@@ -6,10 +6,21 @@ import random
 class Board:
     w:int
     h:int
+    size:tuple[int, int]
     board:np.ndarray
 
     def __init__(self, w:int, h:int):
+        self.w = w
+        self.h = h
+        self.size = (w, h)
         self.board = self.make_board(w, h)
+        print(self.board)
+
+    def get_size(self) -> tuple[int, int]:
+        return self.size
+
+    def get_board(self) -> np.ndarray:
+        return self.board
 
     def place_bomb(self, board:np.ndarray, i:int, j:int):
         w, h = board.shape
@@ -23,7 +34,6 @@ class Board:
     def make_board(self, w:int, h:int, perc = 0.15) -> np.ndarray:
         nbombs = int(w*h*0.15)
         board = np.zeros(shape = [w, h])
-        nbombs = 5
 
         placed_bombs = 0
         while placed_bombs < nbombs:
@@ -35,11 +45,11 @@ class Board:
             self.place_bomb(board, i, j)
             placed_bombs += 1
 
-        print(board)
-        return np.zeros(10)
+        return board
 
 def main():
-    a = Board(10, 10)
+    # a = Board(10, 10)
+    return
 
 if __name__ == "__main__":
     main()
