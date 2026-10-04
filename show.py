@@ -1,18 +1,17 @@
 from minesweep import Board
 import pygame
-
-CELLSIZE = 32
+from constants import *
 
 def get_coords(i, j):
-    return CELLSIZE*i, CELLSIZE*j
+    return CELLSIZE_PIXELS*i, CELLSIZE_PIXELS*j
 
 def show_board(tauler:Board) -> None:
     tauler_inicial = tauler.get_board()
 
     CELLS_W, CELLS_H = tauler.get_size()
 
-    WINDOW_W = CELLSIZE * CELLS_W
-    WINDOW_H = CELLSIZE * CELLS_H
+    WINDOW_W = CELLSIZE_PIXELS * CELLS_W
+    WINDOW_H = CELLSIZE_PIXELS * CELLS_H
 
     screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
     pygame.display.set_caption("Demo")
@@ -46,7 +45,7 @@ def show_board(tauler:Board) -> None:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x, y = event.pos
-                print(f"Clicked cell ({x // CELLSIZE}, {y // CELLSIZE})")       
+                print(f"Clicked cell ({x // CELLSIZE_PIXELS}, {y // CELLSIZE_PIXELS})")       
 
     pygame.quit()
     return
