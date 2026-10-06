@@ -1,6 +1,12 @@
 import numpy as np
 import random
 import constants as c
+from collections import deque
+
+class GameOver(Exception):
+    def __init__(self, message="Game Over!", won=False):
+        super().__init__(message)
+        self.won = won
 
 class Board:
     """
@@ -25,6 +31,11 @@ class Board:
     def get_size(self) -> tuple[int, int]:
         return self.size
 
+    def get_cell(self, i, j) -> int:
+        """Returns the HIDDEN cell in position i, j"""
+        print(self.board[i][j])
+        return int(self.board[i][j])
+
     def get_board(self) -> np.ndarray:
         return self.shown_board
     def get_hidden_board(self) -> np.ndarray:
@@ -45,7 +56,7 @@ class Board:
 
         placed_bombs = 0
         while placed_bombs < nbombs:
-            j, i = random.randint(0, w-1), random.randint(0, h-1)
+            i, j = random.randint(0, h-1), random.randint(0, w-1)
 
             if board[i][j] == c.BOMB_CELL: #if bomb torna a buscar posició
                 continue
@@ -65,27 +76,38 @@ class Board:
         # TODO
         return
 
-    def reveal_cell(self, i:int, j:int) -> int:
+    def reveal_cell(self, i:int, j:int, show_q:set[tuple[int, int]] | None = None) -> set[tuple[int, int]]:
         """La board és privada, està amagada
             Mostrem les caselles i farem show de la shown_board"""
-        cella = self.board[i][j]       
-        match cella:
-            case c.BOMB_CELL:
-                self.reveal_board()
-                return -1
-            case c.EMPTY_CELL:
-                for di in range(-1, 2):
-                    for dj in range(-1, 2):
-                        self.reveal_cell(i+di, j+dj) #revel·la les caselles veïnes
-            case a if a < 9:
-                self.reveal_cell(i, j)
-            case c.OUT_OF_BOUNDS_CELL:
-                pass
-            case c.HIDDEN_CELL | c.FLAGGED_CELL:
-                raise ValueError("Vale això no hauria de passar perquè una casella de la board no pot ser hidden", cella)
-            case _:
-                raise ValueError("what te fuuuk")
-        return 0
+        # print(f"checking cell {i}, {j}")
+        if show_q is None:
+            show_q = set()
+        if (i, j) in show_q:
+            return set()
+
+        if 0 <= i <= self.h-1 and 0 <= j <= self.w-1:
+            show_q.add((i, j))
+            cella = self.get_cell(i, j)
+            match cella:
+                case c.BOMB_CELL:
+                    self.reveal_board()
+                    raise GameOver
+                case c.EMPTY_CELL:
+                    self.shown_board[i][j] = cella
+                    for di in range(-1, 2):
+                        for dj in range(-1, 2):
+                            added = self.reveal_cell(i+di, j+dj, show_q) #revel·la les caselles veïnes
+                            show_q.update(added)
+
+                case a if 1 <= a <= 8:
+                    self.shown_board[i][j] = cella
+                case c.OUT_OF_BOUNDS_CELL:
+                    pass
+                case c.HIDDEN_CELL | c.FLAGGED_CELL:
+                    raise ValueError("Vale això no hauria de passar perquè una casella de la board no pot ser hidden", cella)
+                case _:
+                    raise ValueError("what te fuuuk")
+        return show_q
 
 def main():
     a = Board()
