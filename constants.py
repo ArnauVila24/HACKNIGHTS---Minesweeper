@@ -7,6 +7,8 @@ EMPTY_CELL = 0
 
 #display ctts
 CELLSIZE_PIXELS = 32
+DEFAULT_W = 10
+DEFAULT_H = 5
 
 #nn ctts
 NUM_CHANNELS = 12
