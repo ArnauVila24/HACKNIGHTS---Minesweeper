@@ -60,19 +60,14 @@ class MinesweeperGame:
         fons = pygame.image.load("images/background.png")
         
         #setup icones
-        old_casella = c.HIDDEN_CELL
-        casella_img = self.get_img(old_casella)
 
+        casella_img = self.get_img(c.HIDDEN_CELL)           #evitar carregar molts cops la img, és tot hidden
         for i in range(CELLS_H):
             for j in range(CELLS_W):
-                casella = int(tauler_inicial[i][j])
-                if casella != old_casella: #evitar carregar molts cops la img
-                    casella_img = self.get_img(casella)           
 
                 display.blit(casella_img, self.get_pixel_coords(j, i)) #vol primer x i després y -> girem j - i 
 
-                pygame.display.flip() #sense això no es fa la pantalla
-                old_casella = casella
+        pygame.display.flip() #sense això no es fa la pantalla
         return display
 
     def play(self, display):

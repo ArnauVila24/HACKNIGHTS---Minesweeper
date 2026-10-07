@@ -51,7 +51,7 @@ class Board:
                     board[i+di][j+dj] += 1 if board[i+di][j+dj] != c.BOMB_CELL  else 0
                 
     def make_board(self, w:int, h:int, perc = 0.15) -> np.ndarray:
-        nbombs = int(w*h*0.15)
+        nbombs = int(w*h*0.25)
         board = np.zeros(shape = [h, w])
 
         placed_bombs = 0
