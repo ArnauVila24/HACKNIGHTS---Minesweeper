@@ -88,6 +88,14 @@ class MinesweeperGame:
         pygame.display.flip()
         return 
 
+    def flag_cell(self, i:int, j:int, display):        
+        
+        self.tauler.shown_board[i][j] = c.FLAGGED_CELL
+        flag = self.get_img(c.FLAGGED_CELL)
+        display.blit(flag, self.get_pixel_coords(j, i))
+        pygame.display.flip()
+
+
     def bomb_exploded(self):
         board = self.tauler.get_board()
         hidden_board = self.tauler.get_hidden_board()
@@ -116,18 +124,21 @@ class MinesweeperGame:
                         x, y = event.pos
                         i, j = y // c.CELLSIZE_PIXELS, x // c.CELLSIZE_PIXELS
                         print(f"Clicked cell (h= {y // c.CELLSIZE_PIXELS}, w= {x // c.CELLSIZE_PIXELS})")  
-                        updated_cells = self.tauler.reveal_cell(i, j)
+                        if 1 <= self.tauler.shown_board[i][j] <= 8:
+                            updated_cells = self.tauler.chord(i, j)
+                        else:
+                            updated_cells = self.tauler.reveal_cell(i, j)
+
                         self.paint_cells(updated_cells, display)
 
                         print(f"Processed move in : {time.time() - t1:.05}s")
 
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:                        
+                    elif event.type == pygame.MOUSEBUTTONDOWN:                        
                         x, y = event.pos
                         i, j = y // c.CELLSIZE_PIXELS, x // c.CELLSIZE_PIXELS
 
                         print(f"FLAGGED cell (h= {y // c.CELLSIZE_PIXELS}, w= {x // c.CELLSIZE_PIXELS})")  
-                        self.flag_cell(updated_cells, display)
-                        self.paint_cells(set((i, j)), display)
+                        self.flag_cell(i, j, display)
 
                         print(f"Processed move in : {time.time() - t1:.05}s")
             except GameOver as e:

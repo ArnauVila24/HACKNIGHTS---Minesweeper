@@ -21,7 +21,7 @@ class Board:
     w:int
     h:int
     size:tuple[int, int]
-    board:BoardType # Una casella de la board MAI SERÀ FLAG NI HIDDEN
+    _board:BoardType # Una casella de la board MAI SERÀ FLAG NI HIDDEN
     shown_board:BoardType #Una casella de la shown MAI SERÀ BOMBA 
 
     def __init__(self, w:int = c.DEFAULT_W, h:int = c.DEFAULT_H):
@@ -83,27 +83,61 @@ class Board:
         if (i, j) in show_q:
             return set()
 
-        if 0 <= i <= self.h-1 and 0 <= j <= self.w-1:
-            show_q.add((i, j))
-            cella = self.get_cell(i, j)
-            match cella:
-                case c.BOMB_CELL:
-                    raise GameOver
-                case c.EMPTY_CELL:
-                    self.shown_board[i][j] = cella
-                    for di in range(-1, 2):
-                        for dj in range(-1, 2):
-                            added = self.reveal_cell(i+di, j+dj, show_q) #revel·la les caselles veïnes
-                            show_q.update(added)
+        if not (0 <= i <= self.h-1 and 0 <= j <= self.w-1):
+            return show_q
 
-                case a if 1 <= a <= 8:
-                    self.shown_board[i][j] = cella
-                case c.OUT_OF_BOUNDS_CELL:
-                    pass
-                case c.HIDDEN_CELL | c.FLAGGED_CELL:
-                    raise ValueError("Vale això no hauria de passar perquè una casella de la board no pot ser hidden", cella)
-                case _:
-                    raise ValueError("what te fuuuk")
+        if self.shown_board[i][j] == c.FLAGGED_CELL:
+            return show_q
+
+        
+        show_q.add((i, j))
+        cella = self.get_cell(i, j)
+        match cella:
+            case c.BOMB_CELL:
+                raise GameOver
+            case c.EMPTY_CELL:
+                self.shown_board[i][j] = cella 
+                for di in range(-1, 2):
+                    for dj in range(-1, 2):
+                        self.reveal_cell(i+di, j+dj, show_q) #revel·la les caselles veïnes
+
+            case a if 1 <= a <= 8:
+                self.shown_board[i][j] = cella
+            case c.OUT_OF_BOUNDS_CELL:
+                pass
+            case c.HIDDEN_CELL | c.FLAGGED_CELL:
+                raise ValueError("Vale això no hauria de passar perquè una casella de la board no pot ser hidden", cella)
+            case _:
+                raise ValueError("what te fuuuk")
+        return show_q
+
+    def chord(self, i: int, j: int) -> set[tuple[int, int]]:
+        """Si la casella (i, j) és un número amb tantes banderes al voltant
+        com indica, revela els veïns que continuen amagats."""
+        if not (0 <= i <= self.h-1 and 0 <= j <= self.w-1):
+            return set()
+
+        value = self.shown_board[i][j]
+        if not (1 <= value <= 8): # only works on revealed numbers
+            return set()
+
+        neighbors = [
+            (i+di, j+dj)
+            for di in range(-1, 2)
+            for dj in range(-1, 2)
+            if (di, dj) != (0, 0)
+            and 0 <= i+di <= self.h-1
+            and 0 <= j+dj <= self.w-1
+        ]
+
+        flags = sum(self.shown_board[ni][nj] == c.FLAGGED_CELL for ni, nj in neighbors)
+        if flags != value:
+            return set()
+
+        show_q = set()
+        for ni, nj in neighbors:
+            if self.shown_board[ni][nj] == c.HIDDEN_CELL:
+                self.reveal_cell(ni, nj, show_q)
         return show_q
 
 def main():
