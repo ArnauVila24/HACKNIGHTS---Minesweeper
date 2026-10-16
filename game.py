@@ -1,4 +1,5 @@
 from logic import Board, GameOver
+import time
 import pygame
 import constants as c
 
@@ -16,18 +17,22 @@ class MinesweeperGame:
 
     def get_img(self, celltype) -> pygame.surface.Surface:
         number_cells = [pygame.image.load(f"images/{i}_cell.png") for i in range(1, 7)]
+        img_bomba = pygame.image.load("images/bomb_cell.png")
+        img_empty = pygame.image.load("images/cleared_cell.png")
+        img_flag = pygame.image.load("images/flagged_cell.png")
+        img_hidden = pygame.image.load("images/hidden_cell.png")
+
         match celltype:
             case c.BOMB_CELL:
-                img = pygame.image.load("images/bomb_cell.png")
+                img = img_bomba
             case c.EMPTY_CELL:
-                img = pygame.image.load("images/cleared_cell.png")
+                img = img_empty
             case n if n in [1, 2, 3, 4, 5, 6, 7, 8]:
-                print(celltype)
                 img = number_cells[celltype -1] 
             case c.FLAGGED_CELL:
-                img = pygame.image.load("images/flagged_cell.png")
+                img = img_flag
             case c.HIDDEN_CELL:
-                img = pygame.image.load("images/hidden_cell.png")
+                img = img_hidden
             case _:
                 raise ValueError("wht the fuuu")
         return img
@@ -82,14 +87,15 @@ class MinesweeperGame:
                         x, y = event.pos
                         i, j = y // c.CELLSIZE_PIXELS, x // c.CELLSIZE_PIXELS
                         print(f"Clicked cell (h= {y // c.CELLSIZE_PIXELS}, w= {x // c.CELLSIZE_PIXELS})")  
-                        # print(f"")
                         updated_cells = self.tauler.reveal_cell(i, j)
+                        t1 = time.time()
                         for i, j in updated_cells:
 
                             img = self.get_img(self.tauler.get_cell(i, j))
-                            print(f"displaying cell {i}, {j}")
+                            # print(f"displaying cell {i}, {j}")
                             display.blit(img, self.get_pixel_coords(j, i)) # again, fem swap i <-> j
 
+                        print(f"Time elapsed: {time.time() - t1}")
                         pygame.display.flip()
             except GameOver as e:
                 if e.won:
