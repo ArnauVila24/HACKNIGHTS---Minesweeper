@@ -7,3 +7,6 @@ llavors, sobre un tauler més gran anar passant slices a la nn perquè predigui 
 
 Primer provar que l'output sigui 1-0 Bomba-Descobrir casella.
     Sino, es podria fer que si no té prou confidence deixi la casella per més tard
+
+
+Té pinta que es pot fer amb una NN Convolucional i passar-li absolutament tot el tauler alhora i que com a output tingui la imatge sencera
