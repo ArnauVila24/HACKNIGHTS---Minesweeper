@@ -1,8 +1,10 @@
-import numpy as np
 import random
 import time
 import constants as c
 from collections import deque
+
+type BoardType = list[list[int]]
+
 
 class GameOver(Exception):
     def __init__(self, message="Game Over!", won=False):
@@ -19,31 +21,30 @@ class Board:
     w:int
     h:int
     size:tuple[int, int]
-    board:np.ndarray # Una casella de la board MAI SERÀ FLAG NI HIDDEN
-    shown_board:np.ndarray #Una casella de la shown MAI SERÀ BOMBA 
+    board:BoardType # Una casella de la board MAI SERÀ FLAG NI HIDDEN
+    shown_board:BoardType #Una casella de la shown MAI SERÀ BOMBA 
 
     def __init__(self, w:int = c.DEFAULT_W, h:int = c.DEFAULT_H):
         self.w = w
         self.h = h
         self.size = (h, w) #n files i n columnes
         self.board = self.make_board(w, h)
-        self.shown_board = np.array([[c.HIDDEN_CELL for _ in range(w)] for _ in range(h)])
+        self.shown_board = [[c.HIDDEN_CELL for _ in range(w)] for _ in range(h)]
 
     def get_size(self) -> tuple[int, int]:
         return self.size
 
     def get_cell(self, i, j) -> int:
         """Returns the HIDDEN cell in position i, j"""
-        print(self.board[i][j])
         return int(self.board[i][j])
 
-    def get_board(self) -> np.ndarray:
+    def get_board(self) -> BoardType:
         return self.shown_board
-    def get_hidden_board(self) -> np.ndarray:
+    def get_hidden_board(self) -> BoardType:
         return self.board
 
-    def place_bomb(self, board:np.ndarray, i:int, j:int):
-        h, w = board.shape
+    def place_bomb(self, board:BoardType, i:int, j:int):
+        h, w = len(board), len(board[0])
 
         board[i][j] = c.BOMB_CELL
         for di in range(-1, 2):
@@ -51,9 +52,9 @@ class Board:
                 if 0 <= i+di < h and 0 <= j+dj < w:
                     board[i+di][j+dj] += 1 if board[i+di][j+dj] != c.BOMB_CELL  else 0
                 
-    def make_board(self, w:int, h:int, perc = 0.15) -> np.ndarray:
+    def make_board(self, w:int, h:int, perc = 0.15) -> BoardType:
         nbombs = int(w*h*0.15)
-        board = np.zeros(shape = [h, w])
+        board = [[0 for _ in range(w)] for _ in range(h)]                
 
         random.seed(1234)
         placed_bombs = 0
@@ -73,15 +74,10 @@ class Board:
         self.board[i][j] = c.HIDDEN_CELL
         return
 
-    def reveal_board(self):
-        """For when bomb booms"""
-        # TODO
-        return
-
     def reveal_cell(self, i:int, j:int, show_q:set[tuple[int, int]] | None = None) -> set[tuple[int, int]]:
-        """La board és privada, està amagada
+        """Retorna conjunt de celles que s'han de mostrar al revelar la cella (i, j)        
+            La board és privada, està amagada
             Mostrem les caselles i farem show de la shown_board"""
-        # print(f"checking cell {i}, {j}")
         if show_q is None:
             show_q = set()
         if (i, j) in show_q:
@@ -92,7 +88,6 @@ class Board:
             cella = self.get_cell(i, j)
             match cella:
                 case c.BOMB_CELL:
-                    self.reveal_board()
                     raise GameOver
                 case c.EMPTY_CELL:
                     self.shown_board[i][j] = cella
